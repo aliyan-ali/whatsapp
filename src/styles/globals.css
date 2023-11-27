@@ -29,6 +29,11 @@ a {
     filter: progid: DXImageTransform.Microsoft.gradient(startColorstr="#E2E1DD", endColorstr="#E2E1DD", GradientType=1);  
 }
 
+.signin-bg {
+  background: rgb(17, 27, 33);
+    background: linear-gradient(0deg, rgba(17, 27, 33, 1) 81%, rgba(0, 168, 132, 1) 81%);
+}
+
 /* scrollbar  */
 
 /* width */
@@ -57,3 +62,17 @@ a {
 .css-fjddch-MuiInputBase-root {
   width: 100%;
 }
+
+
+d/* list styling on hover */
+.list-item, .icon-down {
+  transition:all .2s ease-in-out;
+}
+
+.list-item:hover .icon-down {
+  opacity: 1;
+  transform: translate(0px);
+
+}
+
+

@@ -5,7 +5,7 @@ export default function Document() {
     <Html lang="en">
       <Head />
       <title>WhatsApp Web</title>
-      <link id="favicon" rel="shortcut icon" type="image/png" href="https://web.whatsapp.com/img/favicon/1x/favicon.png"></link>
+      
       <body>
         <Main />
         <NextScript />
