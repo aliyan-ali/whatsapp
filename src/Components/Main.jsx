@@ -3,15 +3,15 @@ import Mainbar from "./Mainbar";
 import Sidebar from './Sidebar';
 import React, { useState, useEffect } from "react";
 import ChatBar from './ChatBar';
-import Signup from './Signup';
+import Signup from './SignupForm';
 import SettingSidebar from './SettingSidebar';
 import ProfileSetting from './ProfileSetting';
-// import { ComponentProvider } from "@/Context/context";
 import { useComponent } from '@/Context/context';
+import Newchat from './Newchat';
 
 
 function Main() {
-    const { currentComponent } = useComponent();
+    const { currentComponent, showChatBar } = useComponent();
     const [slideDirection, setSlideDirection] = useState("");
 
    useEffect(() => {
@@ -21,27 +21,33 @@ function Main() {
 
 
 
-    const [showChatBar, setShowChatBar] = useState(false);
+    // const [showChatBar, setShowChatBar] = useState(false);
 
-    // const { currentComponent } = useComponent();
 
-     const toggleChatBar = () => {
-       setShowChatBar(!showChatBar);
-     };
+    //  const toggleChatBar = () => {
+    //    setShowChatBar(!showChatBar);
+    //  };
   return (
     <Box className="main-bg" sx={{ padding: "20px 5vw", height: "100vh" }}>
       <Box sx={{ height: "100%" }}>
         <Grid container sx={{ height: "100%" }}>
           <Grid item xs={4} overflow="hidden">
             <div className={`main ${slideDirection}`}>
-              {currentComponent === "sidebar" && <Sidebar />}
+              {currentComponent === "sidebar" && (
+                <Sidebar/>
+              )}
               {currentComponent === "profile" && <ProfileSetting />}
               {currentComponent === "settings" && <SettingSidebar />}
+              {currentComponent === "newchat" && <Newchat />}
             </div>
           </Grid>
           <Grid item xs={8}>
-            {/* {showChatBar ? <ChatBar /> : <Mainbar />} */}
-            <ChatBar />
+            {showChatBar ? (
+              <ChatBar  />
+            ) : (
+              <Mainbar />
+            )}
+            {/* <ChatBar /> */}
           </Grid>
         </Grid>
       </Box>

@@ -6,13 +6,14 @@ const ComponentContext = createContext();
 // Provider component
 export const ComponentProvider = ({ children }) => {
   const [currentComponent, setCurrentComponent] = useState('sidebar');
+  const [showChatBar, setShowChatBar] = useState(false);
 
   const toggleComponent = (componentName) => {
     setCurrentComponent(componentName);
   };
 
   return (
-    <ComponentContext.Provider value={{ currentComponent, toggleComponent }}>
+    <ComponentContext.Provider value={{ currentComponent, toggleComponent, showChatBar, setShowChatBar }}>
       {children}
     </ComponentContext.Provider>
   );

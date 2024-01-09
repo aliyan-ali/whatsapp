@@ -1,21 +1,18 @@
+import React, { useState, useEffect } from "react";
 import {
-    Avatar,
-    Box,
-    Paper,
-    FormControl,
-    List,
-    Input,
-    InputAdornment,
-    Divider,
-    ListItem,
-    ListItemAvatar,
-    ListItemText,
-    IconButton,
-    colors,
-    Tooltip,
-    Typography,
+  Avatar,
+  Box,
+  Paper,
+  List,
+  Divider,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  IconButton,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import { FocusEventHandler } from "react";
+import { useContext } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -25,65 +22,82 @@ import AddCommentIcon from "@mui/icons-material/AddComment";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import React, {useState} from 'react'
 import { ArrowBackSharp, BackHandSharp } from "@mui/icons-material";
 import { Dropdown } from "@mui/base/Dropdown";
 import { Menu } from "@mui/base/Menu";
 import { MenuButton as BaseMenuButton } from "@mui/base/MenuButton";
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { MenuItem as BaseMenuItem, menuItemClasses } from "@mui/base/MenuItem";
 import { useComponent } from "@/Context/context";
-
-
-
-        const Search = styled("div")(({ theme }) => ({
-        position: "relative",
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: alpha(theme.palette.common.white, 0.15),
-        marginLeft: 0,
-        width: "100%",
-        [theme.breakpoints.up("sm")]: {
-            marginLeft: theme.spacing(1),
-            width: "100%",
-            backgroundColor:'#F0F2F5',
-            borderRadius:'6px'
-        },
-        }));
-        const SearchIconWrapper = styled("div")(({ theme }) => ({
-            padding: theme.spacing(0, 2),
-            height: "100%",
-            position: "absolute",
-            pointerEvents: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-        }));
-        const StyledInputBase = styled(InputBase)(({ theme }) => ({
-            color: "inherit",
-            "& .MuiInputBase-input": {
-                padding: theme.spacing(1, 1, 1, 0),
-                paddingLeft: `calc(1em + ${theme.spacing(5)})`,
-                fontSize:'14px',
-                color:'#667781', 
-                width: "100%",
-            },
-        }));
+import { auth } from "@/Firebase/FirebaseConfig";
+import { RegUserInfo } from "@/Context/RegUserInfo";
+import { useRouter } from "next/router";
+import CircularProgress from "@mui/material/CircularProgress";
+import { GetAddedUsers } from "@/Context/AddedUsers";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
 
 
 
 
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  marginLeft: 0,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(1),
+    width: "100%",
+    backgroundColor: "#F0F2F5",
+    borderRadius: "6px",
+  },
+}));
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    paddingLeft: `calc(1em + ${theme.spacing(5)})`,
+    fontSize: "14px",
+    color: "#667781",
+    width: "100%",
+  },
+}));
 
 
-function Sidebar({ toggleChatBar }) {
+function Sidebar() {
+  const router = useRouter();
+  
+    const { addedUsers, setCurrentChatUser } =
+    useContext(GetAddedUsers);
+    const { user } = useContext(RegUserInfo);
+    const [open, setOpen] = useState(false);
+
   const createHandleMenuClick = (menuItem) => {
     return () => {
       console.log(`Clicked on ${menuItem}`);
     };
   };
 
-
+  const activeUser = (chatUser) => {
+    setCurrentChatUser(chatUser)
+    setShowChatBar(true)
+  }
   // contextprovider
-  const { toggleComponent } = useComponent();
+  const { toggleComponent, showChatBar, setShowChatBar } = useComponent();
 
   const [isFocus, setFocus] = useState(false);
 
@@ -94,6 +108,24 @@ function Sidebar({ toggleChatBar }) {
   const handleBlur = () => {
     setFocus(false);
   };
+  // const handleLogout = () => {
+  //   auth.signOut().then(() => {
+  //     router.push("/");
+  //     console.log("logged out");
+  //   });
+  // };
+
+
+
+      const handleClose = () => {
+        setOpen(false);
+        auth.signOut().then(() => {
+          router.push("/");
+          console.log("logged out");
+        });
+      }; 
+
+
 
   return (
     <Box className="sidebar" sx={{ width: "100%" }}>
@@ -109,7 +141,15 @@ function Sidebar({ toggleChatBar }) {
             cursor: "pointer",
           }}
         >
-          <Avatar onClick={() => toggleComponent("profile")}>AZ</Avatar>
+          {!user?.proImgLink ? (
+            <CircularProgress size={24} />
+          ) : (
+            <Avatar
+              onClick={() => toggleComponent("profile")}
+              src={user?.proImgLink}
+            ></Avatar>
+          )}
+
           <Box
             sx={{
               display: "flex",
@@ -150,7 +190,10 @@ function Sidebar({ toggleChatBar }) {
                 />
               </IconButton>
             </Tooltip>
-            <Tooltip title="New chat">
+            <Tooltip
+              title="New chat"
+              onClick={() => toggleComponent("newchat")}
+            >
               <IconButton>
                 <AddCommentIcon
                   sx={{
@@ -189,9 +232,7 @@ function Sidebar({ toggleChatBar }) {
                 <MenuItem onClick={() => toggleComponent("settings")}>
                   Settings
                 </MenuItem>
-                <MenuItem onClick={createHandleMenuClick("Log out")}>
-                  Log out
-                </MenuItem>
+                <MenuItem onClick={() => setOpen(true)}>Log out</MenuItem>
                 <Divider
                   variant="inset"
                   component="li"
@@ -254,952 +295,145 @@ function Sidebar({ toggleChatBar }) {
           }}
         >
           <Divider variant="outline" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
+          {addedUsers.map((chatUser, index) => (
+            <React.Fragment key={index}>
+              <ListItem
+                onClick={() => activeUser(chatUser)}
+                className="list-item"
+                alignItems="flex-start"
                 sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
+                  width: "100%",
+                  padding: "10px 20px",
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#F0F2F5" },
+                  "&:hover .css-smgy46-MuiSvgIcon-root": {
+                    opacity: "1px",
+                    translate: "translateX(1px)",
+                  },
                 }}
               >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
+                <ListItemAvatar>
+                  <Avatar alt="Cindy Baker" src={chatUser.proImgLink} />
+                </ListItemAvatar>
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    minHeight: "100%",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  <ListItemText
+                    sx={{
+                      maxHeight: "50px",
+                      minHeight: "50px",
+                      paddingTop: "5px",
+                      width: "95%",
+                      height: "100%",
+                      overflow: "hidden",
+                      //   textOverflow:'ellipsis'
+                    }}
+                    primary={chatUser.name}
+                    secondary={
+                      <React.Fragment>
+                        {!chatUser.bio
+                          ? "Hey there I am using Whatsapp"
+                          : chatUser.bio}
+                      </React.Fragment>
                     }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-
-          <ListItem
-            onClick={toggleChatBar}
-            className="list-item"
-            alignItems="flex-start"
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#F0F2F5" },
-              "&:hover .css-smgy46-MuiSvgIcon-root": {
-                opacity: "1px",
-                translate: "translateX(1px)",
-              },
-            }}
-          >
-            <ListItemAvatar>
-              <Avatar alt="Cindy Baker" src="/Assets/person.jpg" />
-            </ListItemAvatar>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                minHeight: "100%",
-                textOverflow: "ellipsis",
-              }}
-            >
-              <ListItemText
-                sx={{
-                  maxHeight: "50px",
-                  minHeight: "50px",
-                  paddingTop: "5px",
-                  width: "95%",
-                  height: "100%",
-                  overflow: "hidden",
-                  //   textOverflow:'ellipsis'
-                }}
-                primary="Oui Oui"
-                secondary={
-                  <React.Fragment>
-                    {
-                      "  wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad wada dw dwa wa ad wad awd w dwa wada dw dwa wa ad wad awd w dwawada dw dwa wa ad wad awd w dwa"
-                    }
-                  </React.Fragment>
-                }
-              />
-              <Typography
-                sx={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "15px",
-                  fontSize: "12px",
-                  color: "#667781",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: "3px",
-                }}
-              >
-                12 pm
-                <KeyboardArrowDownIcon
-                  fontSize="medium"
-                  className="icon-down"
-                  sx={{ opacity: "0", transform: "translateX(15px)" }}
-                />
-              </Typography>
-            </Box>
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
+                  />
+                  <Typography
+                    sx={{
+                      position: "absolute",
+                      right: "10px",
+                      top: "15px",
+                      fontSize: "12px",
+                      color: "#667781",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      justifyContent: "space-between",
+                      gap: "3px",
+                    }}
+                  >
+                    12 pm
+                    <KeyboardArrowDownIcon
+                      fontSize="medium"
+                      className="icon-down"
+                      sx={{ opacity: "0", transform: "translateX(15px)" }}
+                    />
+                  </Typography>
+                </Box>
+              </ListItem>
+              <Divider variant="inset" component="li" />
+            </React.Fragment>
+          ))}
         </List>
+
+        {/* logout dialog foe logout */}
+
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Log out ?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to logout ?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ width: "28vw" }}>
+            <Button
+              onClick={() => setOpen(false)}
+              sx={{ borderRadius: "30px", color: "#017561" }}
+              autoFocus
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleClose}
+              sx={{ bgcolor: "#017561", borderRadius: "30px" }}
+              variant="contained"
+            >
+              Log out
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
 }
 
-
 const blue = {
-    50: "#F0F0F0",
-    100: "#C2C2C2",
-    200: "#999999",
-    300: "#666666",
-    400: "#333333",
-    500: "#000000",
-    600: "#000000",
-    700: "#000000",
-    800: "#000000",
-    900: "#000000",
+  50: "#F0F0F0",
+  100: "#C2C2C2",
+  200: "#999999",
+  300: "#666666",
+  400: "#333333",
+  500: "#000000",
+  600: "#000000",
+  700: "#000000",
+  800: "#000000",
+  900: "#000000",
 };
 
-    const grey = {
-    50: "#F3F6F9",
-    100: "#E5EAF2",
-    200: "#DAE2ED",
-    300: "#C7D0DD",
-    400: "#B0B8C4",
-    500: "#9DA8B7",
-    600: "#6B7A90",
-    700: "#434D5B",
-    800: "#303740",
-    900: "#1C2025",
-    };
+const grey = {
+  50: "#F3F6F9",
+  100: "#E5EAF2",
+  200: "#DAE2ED",
+  300: "#C7D0DD",
+  400: "#B0B8C4",
+  500: "#9DA8B7",
+  600: "#6B7A90",
+  700: "#434D5B",
+  800: "#303740",
+  900: "#1C2025",
+};
 
-    const Listbox = styled("ul")(
-      ({ theme }) => `
+const Listbox = styled("ul")(
+  ({ theme }) => `
     font-family: IBM Plex Sans, sans-serif;
     font-size: 0.875rem;
     padding: 6px 0px;
@@ -1212,14 +446,14 @@ const blue = {
     border: 1px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
     color:  #585d60;
     box-shadow: 0px 4px 6px ${
-        theme.palette.mode === "dark" ? "rgba(0,0,0,0.60)" : "rgba(0,0,0, 0.30)"
+      theme.palette.mode === "dark" ? "rgba(0,0,0,0.60)" : "rgba(0,0,0, 0.30)"
     };
     z-index: 1;
     `
-    );
+);
 
-    const MenuItem = styled(BaseMenuItem)(
-    ({ theme }) => `
+const MenuItem = styled(BaseMenuItem)(
+  ({ theme }) => `
     list-style: none;
     padding: 10px 20px;
     border-radius: 0px;
@@ -1231,8 +465,12 @@ const blue = {
     }
 
     &.${menuItemClasses.focusVisible} {
-        outline: 3px solid ${theme.palette.mode === "dark" ? blue[600] : blue[200]};
-        background-color: ${theme.palette.mode === "dark" ? grey[800] : grey[100]};
+        outline: 3px solid ${
+          theme.palette.mode === "dark" ? blue[600] : blue[200]
+        };
+        background-color: ${
+          theme.palette.mode === "dark" ? grey[800] : grey[100]
+        };
         color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
     }
 
@@ -1241,14 +479,16 @@ const blue = {
     }
 
     &:hover:not(.${menuItemClasses.disabled}) {
-        background-color: ${theme.palette.mode === "dark" ? blue[900] : blue[50]};
+        background-color: ${
+          theme.palette.mode === "dark" ? blue[900] : blue[50]
+        };
         color: ${theme.palette.mode === "dark" ? blue[100] : blue[900]};
     }
     `
-    );
+);
 
-    const MenuButton = styled(BaseMenuButton)(
-    ({ theme }) => `
+const MenuButton = styled(BaseMenuButton)(
+  ({ theme }) => `
     border-radius: 0px;
     color: transparent;
     transition: all 150ms ease;
@@ -1257,4 +497,4 @@ const blue = {
     `
 );
 
-export default Sidebar
+export default Sidebar;

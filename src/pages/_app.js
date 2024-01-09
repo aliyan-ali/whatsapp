@@ -4,8 +4,8 @@ import { ComponentProvider } from '@/Context/context'
 
 export default function App({ Component, pageProps }) {
   return (
-    <ComponentProvider>
-      <Component {...pageProps} />
-    </ComponentProvider>      
+      <ComponentProvider>
+        <Component {...pageProps} />
+      </ComponentProvider>
   )
 }

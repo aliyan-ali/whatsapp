@@ -17,6 +17,13 @@ a {
   text-decoration: none;
 }
 
+
+/* for chat dropdown color */
+
+.MuiMenuButton-root , .css-cqchqt {
+  background-color: inherit !important;
+}
+
 .main-bg {
   background: hsla(48, 8%, 88%, 1);
 
@@ -64,7 +71,7 @@ a {
 }
 
 
-d/* list styling on hover */
+/* list styling on hover */
 .list-item, .icon-down {
   transition:all .2s ease-in-out;
 }
@@ -74,5 +81,19 @@ d/* list styling on hover */
   transform: translate(0px);
 
 }
-
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.042);
+  color: #00A884;
+  width: 200px;
+  height: 200px;
+  border-radius: 100%;
+  position: absolute;
+  right: 5px;
+}
+.btnLoaded {
+  height: 45px;
+}
 

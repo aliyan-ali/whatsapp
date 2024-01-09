@@ -2,8 +2,6 @@ import React from 'react'
 import { styled, alpha } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
-import { IconButton } from '@mui/material';
-import FilterListIcon from "@mui/icons-material/FilterList";
 
 
 
@@ -41,13 +39,16 @@ import FilterListIcon from "@mui/icons-material/FilterList";
         }));
 
 
-function SearchField() {
+function SearchField({ onKeyPress }) {
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && onKeyPress) onKeyPress(e.target.value);
+  };
+
   return (
     <div>
       <Search>
         <SearchIconWrapper>
-            <SearchIcon sx={{ color: "#54656F" }} />
-
+          <SearchIcon sx={{ color: "#54656F" }} />
         </SearchIconWrapper>
         <StyledInputBase
           sx={{
@@ -55,9 +56,11 @@ function SearchField() {
             width: "100%",
             "&::placeholder": { color: "#667781" },
           }}
-        //   onFocus={handleFocus}
-        //   onBlur={handleBlur}
+          //   onFocus={handleFocus}
+          //   onBlur={handleBlur}
+          onKeyDown={handleKeyPress}
           placeholder="Search or Start a new Chat"
+          type="search"
           inputProps={{ "aria-label": "search" }}
         />
       </Search>

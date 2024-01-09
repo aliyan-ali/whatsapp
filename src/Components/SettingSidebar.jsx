@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import Drawer from "@mui/material/Drawer";
 import {Box, Divider, IconButton, Typography } from '@mui/material';
 import { ArrowBack} from '@mui/icons-material';
@@ -16,17 +16,40 @@ import MotionPhotosAutoIcon from "@mui/icons-material/MotionPhotosAuto";
 import HelpIcon from "@mui/icons-material/Help";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useComponent } from "@/Context/context";
-
-
+import { RegUserInfo } from '@/Context/RegUserInfo';
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
+import { auth } from "../Firebase/FirebaseConfig"
+import { useRouter } from 'next/router';
 
 
 
 function SettingSidebar() {
-  // const { isDrawerOpen, closeDrawer } = useDrawer();
 
+  
+  
+  
+  const { toggleComponent } = useComponent();
+  const { user } = useContext(RegUserInfo)
+  const [open, setOpen] = useState(false);
+  const router = useRouter()
 
+      const handleClickOpen = () => {
+        setOpen(true);
+      };
 
-      const { toggleComponent } = useComponent();
+      const handleClose = () => {
+        setOpen(false);
+            auth.signOut().then(() => {
+              router.push("/");
+              console.log("logged out");
+            });
+      };    
+
 
 
   return (
@@ -46,8 +69,8 @@ function SettingSidebar() {
           // overflow:'hidden'
         }}
       >
-        <IconButton color="inherit">
-          <ArrowBack onClick={() => toggleComponent("sidebar")} />
+        <IconButton color="inherit" onClick={() => toggleComponent("sidebar")}>
+          <ArrowBack />
         </IconButton>
         <Typography fontSize={20}>Settings</Typography>
       </Box>
@@ -55,7 +78,7 @@ function SettingSidebar() {
         sx={{
           bgcolor: "white",
           height: "100%",
-          paddingBottom:'55px'
+          paddingBottom: "55px",
         }}
       >
         <Box
@@ -77,19 +100,20 @@ function SettingSidebar() {
             onClick={() => toggleComponent("profile")}
           >
             <Avatar
-              alt="Remy Sharp"
+              alt="profile img"
+              src={user?.proImgLink}
               // src="/static/images/avatar/1.jpg"
               sx={{ width: 75, height: 76 }}
             />
             <Stack direction="column" justifyContent="center">
               <Typography sx={{ fontSize: "17px", color: "#111B21" }}>
-                Your Name
+                {user?.name}
               </Typography>
               <Typography
                 noWrap
                 sx={{ color: "#667781", fontSize: "14px", maxWidth: "300px" }}
               >
-                Your description / bio wad wa wa dawaw da w dwa awd
+                {!user?.bio ? "Hey there I am using Whatsapp" : user.bio}
               </Typography>
             </Stack>
           </Stack>
@@ -287,7 +311,13 @@ function SettingSidebar() {
                 },
               }}
             >
-              <Stack direction="row" spacing={3} paddingLeft={3} paddingTop={2}>
+              <Stack
+                direction="row"
+                spacing={3}
+                paddingLeft={3}
+                paddingTop={2}
+                onClick={handleClickOpen}
+              >
                 <LogoutIcon />
                 <Typography sx={{ fontSize: "16px", color: "#3B4A54" }}>
                   Log out
@@ -302,6 +332,35 @@ function SettingSidebar() {
           </Stack>
         </Box>
       </Box>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Log out ?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to logout ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ width: "28vw" }}>
+          <Button
+            onClick={() => setOpen(false)}
+            sx={{ borderRadius: "30px", color: "#017561" }}
+            autoFocus
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleClose}
+            sx={{ bgcolor: "#017561", borderRadius: "30px" }}
+            variant="contained"
+          >
+            Log out
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
