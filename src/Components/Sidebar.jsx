@@ -384,7 +384,7 @@ function Sidebar() {
               Are you sure you want to logout ?
             </DialogContentText>
           </DialogContent>
-          <DialogActions sx={{ width: "28vw" }}>
+          <DialogActions sx={{ width: "28vw", margin:"7px 4px" }}>
             <Button
               onClick={() => setOpen(false)}
               sx={{ borderRadius: "30px", color: "#017561" }}
@@ -406,31 +406,18 @@ function Sidebar() {
   );
 }
 
-const blue = {
-  50: "#F0F0F0",
-  100: "#C2C2C2",
-  200: "#999999",
-  300: "#666666",
-  400: "#333333",
-  500: "#000000",
-  600: "#000000",
-  700: "#000000",
-  800: "#000000",
-  900: "#000000",
-};
 
-const grey = {
-  50: "#F3F6F9",
-  100: "#E5EAF2",
-  200: "#DAE2ED",
-  300: "#C7D0DD",
-  400: "#B0B8C4",
-  500: "#9DA8B7",
-  600: "#6B7A90",
-  700: "#434D5B",
-  800: "#303740",
-  900: "#1C2025",
-};
+
+
+
+
+
+
+
+
+
+
+
 
 const Listbox = styled("ul")(
   ({ theme }) => `
@@ -442,12 +429,10 @@ const Listbox = styled("ul")(
     border-radius: 0px;
     overflow: auto;
     outline: 0px;
-    background: ${theme.palette.mode === "dark" ? grey[900] : "#fff"};
-    border: 1px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
+    background: #fff;
+    border: 1px solid #DAE2ED;
     color:  #585d60;
-    box-shadow: 0px 4px 6px ${
-      theme.palette.mode === "dark" ? "rgba(0,0,0,0.60)" : "rgba(0,0,0, 0.30)"
-    };
+    box-shadow: 0px 4px 6px rgba(0,0,0, 0.30);
     z-index: 1;
     `
 );
@@ -465,24 +450,13 @@ const MenuItem = styled(BaseMenuItem)(
     }
 
     &.${menuItemClasses.focusVisible} {
-        outline: 3px solid ${
-          theme.palette.mode === "dark" ? blue[600] : blue[200]
-        };
-        background-color: ${
-          theme.palette.mode === "dark" ? grey[800] : grey[100]
-        };
-        color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
+        outline: 3px solid #999999;
+        background-color: #E5EAF2;
+        color: #1C2025;
     }
-
-    &.${menuItemClasses.disabled} {
-        color: ${theme.palette.mode === "dark" ? grey[700] : grey[400]};
-    }
-
     &:hover:not(.${menuItemClasses.disabled}) {
-        background-color: ${
-          theme.palette.mode === "dark" ? blue[900] : blue[50]
-        };
-        color: ${theme.palette.mode === "dark" ? blue[100] : blue[900]};
+        background-color: #F0F0F0;
+        color: #000000;
     }
     `
 );
@@ -493,7 +467,7 @@ const MenuButton = styled(BaseMenuButton)(
     color: transparent;
     transition: all 150ms ease;
     cursor: pointer;
-    border: 0px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
+    border: 0px solid #DAE2ED;
     `
 );
 
