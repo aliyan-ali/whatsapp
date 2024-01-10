@@ -344,7 +344,7 @@ function SettingSidebar() {
             Are you sure you want to logout ?
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ width: "28vw" }}>
+        <DialogActions sx={{ width: "28vw", margin:"7px 4px"}}>
           <Button
             onClick={() => setOpen(false)}
             sx={{ borderRadius: "30px", color: "#017561" }}

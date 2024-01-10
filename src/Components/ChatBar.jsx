@@ -1,4 +1,4 @@
-import { Brightness1, Search, Videocam } from '@mui/icons-material';
+import { Brightness1, CameraAlt, Description, DescriptionOutlined, Person, PhotoFilter, PhotoLibrary, Search, SortRounded, Videocam } from '@mui/icons-material';
 import {
   Avatar,
   Box,
@@ -7,6 +7,7 @@ import {
   IconButton,
   Divider,
   Tooltip,
+  Stack,
 } from "@mui/material";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -63,7 +64,7 @@ const Message = ({ message, userId, onDelete }) => {
                     opacity: "0",
                     fontSize: "16px",
                     color: "#667781",
-                    marginRight: "20px",
+                    marginRight: "10px",
                     alignSelf: "flex-end",
                     backgroundColor: "#F0F2F5",
                     // alignSelf:"flex-end"
@@ -95,7 +96,7 @@ const Message = ({ message, userId, onDelete }) => {
                     opacity: "0",
                     fontSize: "16px",
                     color: "#667781",
-                    marginLeft: "20px",
+                    marginLeft: "10px",
                     alignSelf: "flex-end",
                     backgroundColor: "inherit",
                     // transform: "translateX(15px)",
@@ -239,12 +240,12 @@ function ChatBar() {
             </IconButton>
           </Tooltip>
           <Dropdown>
-            <MenuButton >
+            <MenuButton>
               <Tooltip title="Menu">
                 {/* <IconButton> */}
                 <MoreVertIcon
                   sx={{
-                    backgroundColor:"inherit",
+                    backgroundColor: "inherit",
                     color: "#54656F",
                     padding: "0px 0px",
                     cursor: "pointer",
@@ -253,7 +254,12 @@ function ChatBar() {
                 {/* </IconButton> */}
               </Tooltip>
             </MenuButton>
-            <Menu slots={{ listbox: Listbox }}>
+            <Menu
+              slots={{ listbox: Listbox }}
+              style={{
+                paddingRight: "90px",
+              }}
+            >
               <MenuItem onClick={createHandleMenuClick("Profile")}>
                 Contact info
               </MenuItem>
@@ -271,7 +277,7 @@ function ChatBar() {
                 Disappearing messages
               </MenuItem>
               <MenuItem>clear chat</MenuItem>
-              <MenuItem onClick={()=> handleRemoveAdded(currentChatUser.id)}>
+              <MenuItem onClick={() => handleRemoveAdded(currentChatUser.id)}>
                 Delete chat
               </MenuItem>
               <MenuItem onClick={createHandleMenuClick("Log out")}>
@@ -301,7 +307,12 @@ function ChatBar() {
       >
         {/* <Box sx={{overflow:'hidden',height:'100%', bgcolor:'red'}}> */}
         {chatMessages.map((message, index) => (
-          <Message key={index} message={message} userId={user.userId} onDelete={handleDelete} />
+          <Message
+            key={index}
+            message={message}
+            userId={user.userId}
+            onDelete={handleDelete}
+          />
         ))}
 
         {/* </Box> */}
@@ -321,7 +332,64 @@ function ChatBar() {
             <SentimentSatisfiedAltIcon
               sx={{ cursor: "pointer", margin: "20px 3px" }}
             />
-            <AttachFileIcon sx={{ cursor: "pointer", margin: "20px 3px" }} />
+            <Dropdown>
+              <MenuButton>
+                <Tooltip title="Attach">
+                  <AttachFileIcon
+                    sx={{
+                      cursor: "pointer",
+                      margin: "0px 5px 0px 0px",
+                      color: "#54656F",
+                    }}
+                  />
+                </Tooltip>
+              </MenuButton>
+              <Menu
+                slots={{ listbox: Listbox }}
+                style={{
+                  paddingLeft: "10px",
+                  borderRadius: "20px",
+                }}
+              >
+                <MenuItem>
+                  <Stack direction="row" spacing={2}>
+                    
+                    <Description sx={{ color: "#7F66FF" }} />
+                    <Typography>Document</Typography>
+                  </Stack>
+                </MenuItem>
+                <MenuItem>
+                  <Stack direction="row" spacing={2}>
+                    <PhotoLibrary sx={{ color: "#007BFC" }} />
+                    <Typography>Photos and videos</Typography>
+                  </Stack>
+                </MenuItem>
+                <MenuItem>
+                  <Stack direction="row" spacing={2}>
+                    <CameraAlt sx={{ color: "#FF2E74" }} />
+                    <Typography>Camera</Typography>
+                  </Stack>
+                </MenuItem>
+                <MenuItem>
+                  <Stack direction="row" spacing={2}>
+                    <Person sx={{ color: "#009DE2" }} />
+                    <Typography>Contact</Typography>
+                  </Stack>
+                </MenuItem>
+                <MenuItem>
+                  <Stack direction="row" spacing={2}>
+                    <SortRounded sx={{ color: "#FFBC38" }} />
+                    <Typography>Poll</Typography>
+                  </Stack>
+                </MenuItem>
+                <MenuItem>
+                  <Stack direction="row" spacing={2}>
+                    <PhotoFilter sx={{ color: "#02A698" }} />
+                    <Typography>New Stiker</Typography>
+                  </Stack>
+                </MenuItem>
+              </Menu>
+            </Dropdown>
           </Box>
           <Box
             sx={{
@@ -361,48 +429,25 @@ function ChatBar() {
 
 
 
-const blue = {
-  50: "#F0F0F0",
-  100: "#C2C2C2",
-  200: "#999999",
-  300: "#666666",
-  400: "#333333",
-  500: "#000000",
-  600: "#000000",
-  700: "#000000",
-  800: "#000000",
-  900: "#000000",
-};
 
-const grey = {
-  50: "#F3F6F9",
-  100: "#E5EAF2",
-  200: "#DAE2ED",
-  300: "#C7D0DD",
-  400: "#B0B8C4",
-  500: "#9DA8B7",
-  600: "#6B7A90",
-  700: "#434D5B",
-  800: "#303740",
-  900: "#1C2025",
-};
+
+
+
 
 const Listbox = styled("ul")(
   ({ theme }) => `
     font-family: IBM Plex Sans, sans-serif;
     font-size: 0.875rem;
     padding: 6px 0px;
-    margin: 0px 30px 0px 0px;
+    margin: 12px 0;
     min-width: 200px;
     border-radius: 0px;
     overflow: auto;
     outline: 0px;
-    background: ${theme.palette.mode === "dark" ? grey[900] : "#fff"};
-    border: 1px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
+    background: #fff;
+    border: 1px solid #DAE2ED;
     color:  #585d60;
-    box-shadow: 0px 4px 6px ${
-      theme.palette.mode === "dark" ? "rgba(0,0,0,0.60)" : "rgba(0,0,0, 0.30)"
-    };
+    box-shadow: 0px 4px 6px rgba(0,0,0, 0.30);
     z-index: 1;
     `
 );
@@ -410,7 +455,7 @@ const Listbox = styled("ul")(
 const MenuItem = styled(BaseMenuItem)(
   ({ theme }) => `
     list-style: none;
-    padding: 13px 45px 13px 20px;
+    padding: 10px 20px;
     border-radius: 0px;
     cursor: pointer;
     user-select: none;
@@ -420,24 +465,14 @@ const MenuItem = styled(BaseMenuItem)(
     }
 
     &.${menuItemClasses.focusVisible} {
-        outline: 3px solid ${
-          theme.palette.mode === "dark" ? blue[600] : blue[200]
-        };
-        background-color: ${
-          theme.palette.mode === "dark" ? grey[800] : grey[100]
-        };
-        color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
+        outline: 3px solid #999999;
+        background-color: #E5EAF2;
+        color: #1C2025;
     }
-
-    &.${menuItemClasses.disabled} {
-        color: ${theme.palette.mode === "dark" ? grey[700] : grey[400]};
-    }
-
     &:hover:not(.${menuItemClasses.disabled}) {
-        background-color: ${
-          theme.palette.mode === "dark" ? blue[900] : blue[50]
-        };
-      }
+        background-color: #F0F0F0;
+        color: #000000;
+    }
     `
 );
 
@@ -447,8 +482,7 @@ const MenuButton = styled(BaseMenuButton)(
     color: transparent;
     transition: all 150ms ease;
     cursor: pointer;
-    border: 0px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
+    border: 0px solid #DAE2ED;
     `
 );
-
 export default ChatBar;
