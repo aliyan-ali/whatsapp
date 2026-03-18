@@ -11,7 +11,7 @@ import {
     auth,
 } from '../Firebase/FirebaseConfig';
 
-export const GetAddedUsers = createContext();
+export const GetAddedUsers = createContext(); 
 
 const GetAddedUsersProvider = ({ children }) => {
     const [currentChatUser, setCurrentChatUser] = useState();
